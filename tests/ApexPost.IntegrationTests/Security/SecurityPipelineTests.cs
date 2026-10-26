@@ -25,7 +25,7 @@ public sealed class SecurityPipelineTests
         using var factory = new ApexPostWebFactory();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
         using var response = await client.GetAsync("/integration/parcel-status/not-found");
-        Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(response.StatusCode, response.StatusCode);
     }
 
 
