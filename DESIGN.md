@@ -1,5 +1,9 @@
 # ApexPost Logistics — Design and Architecture
 
+## Assessment evidence status
+
+This document describes the implementation visible in the source tree. The current package's integration suite contains eight tests; it does **not** currently include a test for an unconfigured integration API key returning 500. Build/test execution and manual acceptance must be completed on a machine with the .NET 10 SDK before claiming the requirements are verified. See `README.md`, `CHECKLIST.md` and `ASSESSMENT-TRACEABILITY.md`.
+
 ## 1. Design goals and scope
 
 This solution follows the Assessment 02 constraints: .NET 10, C# 14, nullable references enabled, ASP.NET Core MVC, no database/ORM, JSON repositories behind interfaces, custom cookie authentication (no ASP.NET Core Identity), async I/O with cancellation, middleware and action filters, auditability, and testable business rules.
@@ -91,12 +95,12 @@ The pipeline is registered in `Program.cs` in this order:
 8. **CORS** — restricted to the configured partner widget origin and GET/approved headers.
 9. **IP restriction** — applies to `/Admin`, branch/staff administration metadata and `/integration` paths; denies non-allowlisted clients with 403.
 10. **API-key validation** — only endpoints marked with `RequireApiKeyAttribute`; missing/invalid key gives 401; unconfigured server key gives 500; comparisons use `CryptographicOperations.FixedTimeEquals`. A partner-specific key can be configured under `Integration:Partners:<partnerId>:ApiKey`.
-11. **Rate limiter** — login fixed-window policy and an authenticated-partner partition (partner identity is set only after key validation); 429 responses include `Retry-After`.
+11. **Rate limiter** — login fixed-window policy and a partner partition; 429 responses include `Retry-After`. Verify endpoint policy metadata and the order with partner identity set by API-key validation.
 12. **Cookie authentication** — validates the signed cookie and claims.
 13. **Authorization** — roles and policies are enforced before controller execution.
 14. **Endpoint execution** — MVC controllers and health checks.
 
-`Use`, `Run`, `Map`, `MapWhen` and `UseWhen` are demonstrated deliberately: `Use` registers the main middleware chain and conditional context tagging; `MapWhen` branches integration requests while continuing to endpoint execution; `Map` creates a liveness branch; `Run` is terminal for that liveness response. `MapHealthChecks` provides `/health`.
+`Use`, `Run`, `Map`, `MapWhen` and `UseWhen` are demonstrated deliberately: `Use` registers the main middleware chain and conditional context tagging; `MapWhen` is used to branch integration requests for request-context tagging; because `MapWhen` does not rejoin the main pipeline, verify this branch carefully against endpoint execution and security middleware. Do not claim the branch is safe solely because it is present.; `Map` creates a liveness branch; `Run` is terminal for that liveness response. `MapHealthChecks` provides `/health`.
 
 ### Proxy / forwarded-header risk
 

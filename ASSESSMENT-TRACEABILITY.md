@@ -1,33 +1,39 @@
 # Assessment 02 Requirement Traceability Matrix
 
-Status key: **Implemented in source** means an implementation has been authored; **Needs runtime verification** means the target SDK build/test/manual acceptance still must be performed. Since this authoring environment has no .NET SDK, no row is marked runtime-verified.
+**Evidence status:** This matrix maps the inspected source to assessment areas. “Present in source” is not equivalent to a passing build or accepted behavior. No runtime verification is claimed by this package.
 
-| Requirement / marks area | Planned/implemented location | Evidence / verification | Status |
+| Requirement / marks area | Source evidence | Verification still required | Status |
 |---|---|---|---|
-| Branches, counters, staff and roles | `Domain/Primitives.cs`; `BranchesController`; `StaffController`; seed initializer | Domain checks; admin role smoke test; seed counts | Implemented; runtime verification pending |
-| Product catalogue and per-branch stock | `Product`, `StockItem`; `ProductsController`; `InventoryController` | Stock never-negative unit test; stock-adjustment negative test | Implemented; runtime verification pending |
-| Shipping price strategy and max weight | `IShippingPricingStrategy`; `ZoneRateShippingPricingStrategy`; `BusinessRules` | `BusinessRuleTests` weight/pricing cases | Implemented; runtime verification pending |
-| Money orders + same-transaction identity verification | `MoneyOrdersController`; `MoneyOrder`; `IdentityVerification`; `CounterService` | Domain threshold test; manual high-value workflow; inspect persisted links and masked number | Implemented; runtime verification pending |
-| Mixed transaction basket, tax and payment | `CounterTransaction`; `CounterService`; transaction views | totals/lifecycle unit tests; add retail + shipping + payment browser test | Implemented; runtime verification pending |
-| Voids/refunds manager-only + reason | `TransactionsController`; `BusinessRules.EnsureManager` | clerk-forbidden integration test; manager success/failure manual tests | Implemented; runtime verification pending |
-| Four reports | `ReportService`; `ReportsController`; report views | report calculation tests/manual seeded-data review | Implemented; runtime verification pending |
-| JSON repositories and async I/O | `JsonRepository<T>`; `JsonAuditStore` | Add infrastructure tests for malformed JSON, missing file, concurrent writes and cancellation | Implemented; additional tests recommended |
-| At least 8 advanced C# 14 features (15 marks) | `Primitives.cs`, `LanguageFeatures.cs`, Application/Infrastructure services | Feature matrix in `DESIGN.md`; build with .NET 10/C# 14 | Implemented in source; compiler verification pending |
-| MVC pages and PRG (10 marks) | `Views/`, controllers | Browser acceptance test for each POST and correct result | Implemented; runtime verification pending |
-| Exception, correlation, timing, maintenance, headers (middleware 20 marks) | `Middleware/PipelineMiddleware.cs` | Header/correlation integration tests; maintenance toggle manual test | Implemented; runtime verification pending |
-| API key, IP allowlist, cookies, roles, antiforgery, rate limiting, CORS | `Program.cs`, middleware, `AccountController`, `IntegrationController` | 401, 403, 429, login redirect and clerk void tests; CORS manual test | Implemented; runtime verification pending |
-| Audit, validation, performance filters (15 marks) | `Filters/ActionFilters.cs`; `JsonAuditStore` | Inspect generated `AuditRecord.jsonl`; verify redaction and slow-action warning | Implemented; runtime verification pending |
-| Async, Task.WhenAll, SemaphoreSlim, cache, timeouts (10 marks) | Application/Infrastructure/Controllers | Load/concurrency test and measured baseline recommended | Implemented; measurements pending |
-| Unit + at least 6 integration tests; docs/ADRs/Git (10 marks) | `tests/`, README, DESIGN, ADRs, workflow | `dotnet test -c Release`; Git diff/secret scan; inspect actual test output | Test sources authored; runtime verification pending |
-| Seed minimum counts | `Infrastructure/SeedData.cs` | Inspect JSON counts after clean local startup | Implemented in source; runtime verification pending |
-| Exact deliverables | Root documentation and `AUDIT-SAMPLE.json` | File existence and checklist review | Implemented in source; runtime verification pending |
+| Domain/business rules — 20 | `src/ApexPost.Domain/Primitives/Primitives.cs`; `Rules/LanguageFeatures.cs`; application services; `tests/ApexPost.UnitTests/Domain/BusinessRuleTests.cs` | Build and execute tests; end-to-end workflows for stock, branch status, money orders, mixed transactions, void/refund | Source present; runtime pending |
+| Seed data and reports | `src/ApexPost.Infrastructure/SeedData/AppSeeder.cs`; `src/ApexPost.Application/Reports/ReportService.cs`; `src/ApexPost.Web/Controllers/ReportsController.cs` and report views | Verify 5 branches, 20 staff, 30 products, 10 zones/rates, 40 historical transactions; validate four report outputs | Source present; runtime pending |
+| Advanced C# 14 — 15 | `Primitives.cs`, `Rules/LanguageFeatures.cs`, application and infrastructure services | Build using .NET 10/C# 14; verify examples are used and warnings are addressed | Source present; compiler verification pending |
+| MVC — 10 | `src/ApexPost.Web/Controllers/`, `Views/`, `Models/`, `Program.cs` | Browser test form validation, antiforgery, PRG, 404/403 and branch scoping | Source present; manual verification pending |
+| Middleware/security/observability — 20 | `src/ApexPost.Web/Middleware/PipelineMiddleware.cs`; `Program.cs`; `Security/SameBranchAuthorization.cs` | Execute security integration tests; verify middleware order, API key and IP behavior, maintenance, CORS, rate limiting and health endpoints | Source present; runtime pending |
+| API key not configured | `ApiKeyMiddleware` handles empty configuration with 500 in source | Add/run integration test with an allowed client and empty `Integration:ApiKey`; ensure IP middleware does not short-circuit first | Test evidence missing in current inspected suite |
+| Action filters/audit — 15 | `src/ApexPost.Web/Filters/ActionFilters.cs`; `src/ApexPost.Infrastructure/Audit/JsonAuditStore.cs`; `AUDIT-SAMPLE.json` | Inspect runtime JSONL, redaction, actor/result/correlation fields and failure handling | Source present; runtime pending |
+| Performance — 10 | async JSON repository, cancellation, `Task.WhenAll`, `SemaphoreSlim`, `RateCache`, courier timeout/concurrency and rate limiting | Search blocking calls, run concurrent stock and load tests, capture measurements | Source present; measurements pending |
+| Tests/docs/ADRs/Git — 10 | 8 unit tests, 8 integration tests, README, DESIGN, checklist, traceability, 8 ADRs, CI workflow | `dotnet restore`, Release build, `dotnet test`, inspect CI results and final Git diff | Source/docs present; runtime pending |
 
-## Required target-machine acceptance run
+## Required target-machine verification
 
-1. `dotnet restore ApexPost.slnx`
-2. `dotnet build ApexPost.slnx -c Release`
-3. `dotnet test ApexPost.slnx -c Release --logger "console;verbosity=normal"`
-4. Run the Web app with secrets configured; verify seeded counts and role accounts.
-5. Manually verify PRG, branch isolation, closed branch, inactive staff, stock concurrency, high-value money-order verification link, void/refund, maintenance bypass for health, CORS, API key 401/500, blocked IP 403 and rate-limit 429.
-6. Review all warnings, generated audit entries, JSON privacy, Git status and secret scan.
-7. Attach actual build/test/coverage output before claiming complete verification.
+From the repository root:
+
+```bash
+dotnet restore ApexPost.sln
+dotnet build ApexPost.sln -c Release
+dotnet test ApexPost.sln -c Release --logger "console;verbosity=normal"
+```
+
+Then manually verify:
+1. First-run seed counts and existing-data preservation.
+2. Staff login/logout and role authorization.
+3. Branch isolation and closed/inactive entity handling.
+4. Retail/shipping mixed transaction and payment.
+5. High-value money-order identity verification linked to the same transaction.
+6. Manager-only void/refund with required reason.
+7. All four reports.
+8. Security headers, correlation ID, exception handling, maintenance/health, API key 401/500, blocked IP 403, rate-limit 429 and partner CORS.
+9. Audit JSONL redaction and record fields.
+10. No secrets or build/runtime artifacts in Git/package.
+
+Record actual command output before marking any row runtime-verified.
