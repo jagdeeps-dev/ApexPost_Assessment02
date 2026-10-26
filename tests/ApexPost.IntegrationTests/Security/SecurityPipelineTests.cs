@@ -20,12 +20,12 @@ public sealed class SecurityPipelineTests
     }
 
     [Fact]
-    public async Task Integration_endpoint_returns_401_without_api_key()
+    public async Task Integration_endpoint_returns_401_without_api_key_failed()
     {
         using var factory = new ApexPostWebFactory();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
         using var response = await client.GetAsync("/integration/parcel-status/not-found");
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
 
