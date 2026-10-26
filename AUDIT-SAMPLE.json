@@ -1,0 +1,44 @@
+[
+  {
+    "id": "sample-audit-0001",
+    "staffId": "staff-demo-0001",
+    "role": "CounterClerk",
+    "branchCode": "IND01",
+    "controller": "TransactionsController",
+    "action": "Complete",
+    "routeValues": "id=sample-transaction-001",
+    "statusCode": 302,
+    "durationMs": 24,
+    "correlationId": "sample-correlation-0001",
+    "timestamp": "2026-10-25T00:00:00+00:00",
+    "outcome": "Succeeded"
+  },
+  {
+    "id": "sample-audit-0002",
+    "staffId": "staff-demo-manager-0002",
+    "role": "BranchManager",
+    "branchCode": "IND01",
+    "controller": "TransactionsController",
+    "action": "Void",
+    "routeValues": "transactionId=sample-transaction-002",
+    "statusCode": 302,
+    "durationMs": 31,
+    "correlationId": "sample-correlation-0002",
+    "timestamp": "2026-10-25T00:02:00+00:00",
+    "outcome": "Succeeded"
+  },
+  {
+    "id": "sample-audit-0003",
+    "staffId": "staff-demo-clerk-0003",
+    "role": "CounterClerk",
+    "branchCode": "DEL01",
+    "controller": "MoneyOrdersController",
+    "action": "Create",
+    "routeValues": "transactionId=sample-transaction-003;identityVerification=performed",
+    "statusCode": 302,
+    "durationMs": 46,
+    "correlationId": "sample-correlation-0003",
+    "timestamp": "2026-10-25T00:04:00+00:00",
+    "outcome": "Succeeded"
+  }
+]
